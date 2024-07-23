@@ -1,20 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:message_app/pages/my_posts_page.dart';
+import 'package:message_app/pages/home_page.dart';
 import 'package:message_app/services/firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
+class MyPostsPage extends StatefulWidget {
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MyPostsPage> createState() => _MyPostsPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MyPostsPageState extends State<MyPostsPage> {
   final firestoreService = FirestoreService();
   final titlePostController = TextEditingController();
   final textPostController = TextEditingController();
@@ -22,11 +20,6 @@ class _HomePageState extends State<HomePage> {
   Future<User?> _getCurrentUser() async {
     // Get the current user
     return FirebaseAuth.instance.currentUser;
-  }
-
-  // sign user out
-  void signOut() {
-    FirebaseAuth.instance.signOut();
   }
 
   // open a dialog box to add a post
@@ -137,7 +130,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text("MessageApp"),
+        title: const Text("My Posts"),
         leading: Builder(
           builder: (context) {
             return IconButton(
@@ -148,13 +141,6 @@ class _HomePageState extends State<HomePage> {
             );
           },
         ),
-        actions: [
-          // sign out button
-          IconButton(
-            onPressed: signOut,
-            icon: const Icon(Icons.logout),
-          )
-        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: openPostBox,
@@ -273,7 +259,10 @@ class _HomePageState extends State<HomePage> {
                 title:
                     const Text('Home', style: TextStyle(color: Colors.white)),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  );
                 },
               ),
               ListTile(
@@ -282,10 +271,7 @@ class _HomePageState extends State<HomePage> {
                 title: const Text('My Posts',
                     style: TextStyle(color: Colors.white)),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MyPostsPage()),
-                  );
+                  Navigator.pop(context);
                 },
               ),
               ListTile(
