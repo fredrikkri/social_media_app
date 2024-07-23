@@ -15,6 +15,11 @@ class _HomePageState extends State<HomePage> {
   final titlePostController = TextEditingController();
   final textPostController = TextEditingController();
 
+  Future<User?> _getCurrentUser() async {
+    // Get the current user
+    return FirebaseAuth.instance.currentUser;
+  }
+
   // sign user out
   void signOut() {
     FirebaseAuth.instance.signOut();
@@ -226,6 +231,37 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.pop(context);
                 },
+              ),
+              Center(
+                child: Column(
+                  children: [
+                    const Text(
+                      'Current User:',
+                      style:
+                          TextStyle(color: Color.fromARGB(126, 241, 241, 241)),
+                    ),
+                    FutureBuilder<User?>(
+                      future: _getCurrentUser(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (snapshot.hasData) {
+                          User? user = snapshot.data;
+                          return Text(
+                            user?.email ?? 'No user signed in',
+                            style: const TextStyle(
+                                fontSize: 20, color: Colors.blue),
+                          );
+                        } else {
+                          return const Text('No user signed in');
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

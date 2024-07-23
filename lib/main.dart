@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:message_app/auth/auth.dart';
-//import 'package:message_app/auth/login_or_register.dart';
+import 'package:message_app/auth/login_or_register.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
