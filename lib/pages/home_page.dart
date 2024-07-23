@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:message_app/services/firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,7 +33,7 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        content: Container(
+        content: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Column(
             children: [
@@ -54,14 +57,12 @@ class _HomePageState extends State<HomePage> {
           ElevatedButton(
             onPressed: () {
               if (docID == null) {
-                firestoreService.addPost(
-                    titlePostController.text, textPostController.text);
+                createThePost();
               } else {
-                firestoreService.updatePost(
-                    docID, titlePostController.text, textPostController.text);
+                updateThePost(docID);
               }
-              titlePostController.clear();
-              textPostController.clear();
+              // titlePostController.clear();
+              // textPostController.clear();
               Navigator.pop(context);
             },
             child: const Text('Add'),
@@ -69,6 +70,64 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Future<XFile?> pickImage() async {
+    final picker = ImagePicker();
+    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    return pickedFile;
+  }
+
+  Future<String> uploadImage(File imageFile) async {
+    try {
+      print('Uploading image: ${imageFile.path}');
+      final storageRef = FirebaseStorage.instance.ref();
+      final imageRef = storageRef
+          .child('images/${DateTime.now().millisecondsSinceEpoch}.png');
+      final uploadTask = imageRef.putFile(imageFile);
+
+      uploadTask.snapshotEvents.listen((event) {
+        print(
+            'Upload progress: ${(event.bytesTransferred / event.totalBytes) * 100}%');
+      });
+
+      await uploadTask.whenComplete(() => print('Upload complete'));
+
+      final downloadUrl = await imageRef.getDownloadURL();
+      print('Image uploaded successfully. Download URL: $downloadUrl');
+      return downloadUrl;
+    } catch (e) {
+      print('Error uploading image: $e');
+      return '';
+    }
+  }
+
+  Future<void> createThePost() async {
+    final pickedFile = await pickImage();
+    if (pickedFile != null) {
+      final imageFile = File(pickedFile.path);
+      final imageUrl = await uploadImage(imageFile);
+      await firestoreService.addPost(titlePostController.text,
+          textPostController.text, imageUrl.toString());
+    } else {
+      print('No image selected.');
+    }
+    titlePostController.clear();
+    textPostController.clear();
+  }
+
+  Future<void> updateThePost(String docID) async {
+    final pickedFile = await pickImage();
+    if (pickedFile != null) {
+      final imageFile = File(pickedFile.path);
+      final imageUrl = await uploadImage(imageFile);
+      await firestoreService.updatePost(docID, titlePostController.text,
+          textPostController.text, imageUrl.toString());
+    } else {
+      print('No image selected.');
+    }
+    titlePostController.clear();
+    textPostController.clear();
   }
 
   @override
