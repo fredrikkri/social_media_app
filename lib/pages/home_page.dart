@@ -105,11 +105,15 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> createThePost() async {
     final pickedFile = await pickImage();
+    final currUser = await _getCurrentUser();
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
       final imageUrl = await uploadImage(imageFile);
-      await firestoreService.addPost(titlePostController.text,
-          textPostController.text, imageUrl.toString());
+      await firestoreService.addPost(
+          titlePostController.text,
+          textPostController.text,
+          imageUrl.toString(),
+          currUser?.email ?? 'undefined');
     } else {
       print('No image selected.');
     }
@@ -137,7 +141,10 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text("MessageApp"),
+        title: const Text(
+          "MessageApp",
+          style: TextStyle(color: Colors.blue),
+        ),
         leading: Builder(
           builder: (context) {
             return IconButton(
@@ -177,27 +184,28 @@ class _HomePageState extends State<HomePage> {
                 // A Post
                 return Column(
                   children: [
-                    Text(postTitle),
                     Container(
                       decoration: const BoxDecoration(
                           color: Color.fromARGB(255, 233, 233, 233)),
                       height: 400,
                       width: double.infinity,
                     ),
-                    Row(
+                    Column(
                       children: [
-                        Container(
-                          constraints: const BoxConstraints(maxWidth: 350),
-                          padding: const EdgeInsets.only(left: 10, top: 5),
-                          child: Text(postText),
-                        ),
-                        const Spacer(),
-                        Column(
+                        Row(
                           children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                postTitle,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const Spacer(),
                             // Favorite button
                             IconButton(
-                              padding:
-                                  const EdgeInsets.only(top: 15, right: 15),
+                              //padding: const EdgeInsets.only(top: 15, right: 15),
                               onPressed: () {},
                               icon: const Icon(
                                 Icons.favorite,
@@ -205,24 +213,17 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             // updatebutton
-                            IconButton(
-                              padding:
-                                  const EdgeInsets.only(top: 15, right: 15),
-                              onPressed: () => openPostBox(docID: docID),
-                              icon: const Icon(
-                                Icons.settings,
-                                size: 30,
-                              ),
-                            ),
-                            // deletebutton
-                            IconButton(
-                              padding:
-                                  const EdgeInsets.only(top: 15, right: 15),
-                              onPressed: () =>
-                                  firestoreService.deletePost(docID),
-                              icon: const Icon(
-                                Icons.delete,
-                                size: 30,
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Flexible(
+                                //padding: const EdgeInsets.only(left: 10, top: 5),
+                                child: Text(postText),
                               ),
                             ),
                           ],
@@ -234,7 +235,10 @@ class _HomePageState extends State<HomePage> {
               },
             );
           } else {
-            return const Text('No posts...');
+            return const Center(
+                child: CircularProgressIndicator(
+              backgroundColor: Colors.purple,
+            ));
           }
         },
       ),

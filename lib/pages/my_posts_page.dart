@@ -22,6 +22,11 @@ class _MyPostsPageState extends State<MyPostsPage> {
     return FirebaseAuth.instance.currentUser;
   }
 
+  // sign user out
+  void signOut() {
+    FirebaseAuth.instance.signOut();
+  }
+
   // open a dialog box to add a post
   void openPostBox({String? docID}) {
     showDialog(
@@ -98,11 +103,15 @@ class _MyPostsPageState extends State<MyPostsPage> {
 
   Future<void> createThePost() async {
     final pickedFile = await pickImage();
+    final currUser = await _getCurrentUser();
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
       final imageUrl = await uploadImage(imageFile);
-      await firestoreService.addPost(titlePostController.text,
-          textPostController.text, imageUrl.toString());
+      await firestoreService.addPost(
+          titlePostController.text,
+          textPostController.text,
+          imageUrl.toString(),
+          currUser?.email ?? 'undefined');
     } else {
       print('No image selected.');
     }
@@ -124,13 +133,37 @@ class _MyPostsPageState extends State<MyPostsPage> {
     textPostController.clear();
   }
 
+  Widget getCurrentUserEmailTextWidget() {
+    return FutureBuilder<User?>(
+      future: _getCurrentUser(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (snapshot.hasData) {
+          User? user = snapshot.data;
+          return Text(
+            user?.email ?? 'No user signed in',
+            style: const TextStyle(fontSize: 20, color: Colors.blue),
+          );
+        } else {
+          return const Text('No user signed in');
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text("My Posts"),
+        title: const Text(
+          "My Posts",
+          style: TextStyle(color: Colors.blue),
+        ),
         leading: Builder(
           builder: (context) {
             return IconButton(
@@ -147,7 +180,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
         child: const Icon(Icons.add),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: firestoreService.getPostsStream(),
+        stream: firestoreService.getPostsStreamCurrentUser(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List postsList = snapshot.data!.docs;
@@ -163,27 +196,28 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 // A Post
                 return Column(
                   children: [
-                    Text(postTitle),
                     Container(
                       decoration: const BoxDecoration(
                           color: Color.fromARGB(255, 233, 233, 233)),
                       height: 400,
                       width: double.infinity,
                     ),
-                    Row(
+                    Column(
                       children: [
-                        Container(
-                          constraints: const BoxConstraints(maxWidth: 350),
-                          padding: const EdgeInsets.only(left: 10, top: 5),
-                          child: Text(postText),
-                        ),
-                        const Spacer(),
-                        Column(
+                        Row(
                           children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                postTitle,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const Spacer(),
                             // Favorite button
                             IconButton(
-                              padding:
-                                  const EdgeInsets.only(top: 15, right: 15),
+                              //padding: const EdgeInsets.only(top: 15, right: 15),
                               onPressed: () {},
                               icon: const Icon(
                                 Icons.favorite,
@@ -192,8 +226,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
                             ),
                             // updatebutton
                             IconButton(
-                              padding:
-                                  const EdgeInsets.only(top: 15, right: 15),
+                              //padding: const EdgeInsets.only(top: 15, right: 15),
                               onPressed: () => openPostBox(docID: docID),
                               icon: const Icon(
                                 Icons.settings,
@@ -202,13 +235,25 @@ class _MyPostsPageState extends State<MyPostsPage> {
                             ),
                             // deletebutton
                             IconButton(
-                              padding:
-                                  const EdgeInsets.only(top: 15, right: 15),
+                              //padding: const EdgeInsets.only(top: 15, right: 15),
                               onPressed: () =>
                                   firestoreService.deletePost(docID),
                               icon: const Icon(
                                 Icons.delete,
                                 size: 30,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Flexible(
+                                //padding: const EdgeInsets.only(left: 10, top: 5),
+                                child: Text(postText),
                               ),
                             ),
                           ],
@@ -220,7 +265,10 @@ class _MyPostsPageState extends State<MyPostsPage> {
               },
             );
           } else {
-            return const Text('No posts...');
+            return const Center(
+                child: CircularProgressIndicator(
+              backgroundColor: Colors.purple,
+            ));
           }
         },
       ),
@@ -290,26 +338,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
                       style:
                           TextStyle(color: Color.fromARGB(126, 241, 241, 241)),
                     ),
-                    FutureBuilder<User?>(
-                      future: _getCurrentUser(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else if (snapshot.hasData) {
-                          User? user = snapshot.data;
-                          return Text(
-                            user?.email ?? 'No user signed in',
-                            style: const TextStyle(
-                                fontSize: 20, color: Colors.blue),
-                          );
-                        } else {
-                          return const Text('No user signed in');
-                        }
-                      },
-                    ),
+                    getCurrentUserEmailTextWidget(),
                   ],
                 ),
               ),
