@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:message_app/pages/home_page.dart';
-import 'package:message_app/services/firestore.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:message_app/pages/home_page.dart';
+
+import 'package:message_app/services/firestore.dart';
+import 'package:message_app/services/upload_image.dart';
+
 class MyPostsPage extends StatefulWidget {
+  const MyPostsPage({super.key});
   @override
   State<MyPostsPage> createState() => _MyPostsPageState();
 }
@@ -22,7 +24,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
     return FirebaseAuth.instance.currentUser;
   }
 
-  // open a dialog box to add a post
   void openPostBox({String? docID}) {
     showDialog(
       context: context,
@@ -66,42 +67,12 @@ class _MyPostsPageState extends State<MyPostsPage> {
     );
   }
 
-  Future<XFile?> pickImage() async {
-    final picker = ImagePicker();
-    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    return pickedFile;
-  }
-
-  Future<String> uploadImage(File imageFile) async {
-    try {
-      print('Uploading image: ${imageFile.path}');
-      final storageRef = FirebaseStorage.instance.ref();
-      final imageRef = storageRef
-          .child('images/${DateTime.now().millisecondsSinceEpoch}.png');
-      final uploadTask = imageRef.putFile(imageFile);
-
-      uploadTask.snapshotEvents.listen((event) {
-        print(
-            'Upload progress: ${(event.bytesTransferred / event.totalBytes) * 100}%');
-      });
-
-      await uploadTask.whenComplete(() => print('Upload complete'));
-
-      final downloadUrl = await imageRef.getDownloadURL();
-      print('Image uploaded successfully. Download URL: $downloadUrl');
-      return downloadUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      return '';
-    }
-  }
-
   Future<void> createThePost() async {
-    final pickedFile = await pickImage();
+    final pickedFile = await const UploadImageService().pickImage();
     final currUser = await _getCurrentUser();
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
-      final imageUrl = await uploadImage(imageFile);
+      final imageUrl = await const UploadImageService().uploadImage(imageFile);
       await firestoreService.addPost(
           titlePostController.text,
           textPostController.text,
@@ -115,10 +86,10 @@ class _MyPostsPageState extends State<MyPostsPage> {
   }
 
   Future<void> updateThePost(String docID) async {
-    final pickedFile = await pickImage();
+    final pickedFile = await const UploadImageService().pickImage();
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
-      final imageUrl = await uploadImage(imageFile);
+      final imageUrl = await const UploadImageService().uploadImage(imageFile);
       await firestoreService.updatePost(docID, titlePostController.text,
           textPostController.text, imageUrl.toString());
     } else {

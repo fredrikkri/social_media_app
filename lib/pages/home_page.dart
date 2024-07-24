@@ -1,11 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:message_app/components/feed_posts.dart';
 import 'package:message_app/pages/my_posts_page.dart';
 import 'package:message_app/services/firestore.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:io';
+import 'package:message_app/services/upload_image.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,12 +25,6 @@ class _HomePageState extends State<HomePage> {
     return FirebaseAuth.instance.currentUser;
   }
 
-  // sign user out
-  void signOut() {
-    FirebaseAuth.instance.signOut();
-  }
-
-  // open a dialog box to add a post
   void openPostBox({String? docID}) {
     showDialog(
       context: context,
@@ -73,42 +68,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<XFile?> pickImage() async {
-    final picker = ImagePicker();
-    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    return pickedFile;
-  }
-
-  Future<String> uploadImage(File imageFile) async {
-    try {
-      print('Uploading image: ${imageFile.path}');
-      final storageRef = FirebaseStorage.instance.ref();
-      final imageRef = storageRef
-          .child('images/${DateTime.now().millisecondsSinceEpoch}.png');
-      final uploadTask = imageRef.putFile(imageFile);
-
-      uploadTask.snapshotEvents.listen((event) {
-        print(
-            'Upload progress: ${(event.bytesTransferred / event.totalBytes) * 100}%');
-      });
-
-      await uploadTask.whenComplete(() => print('Upload complete'));
-
-      final downloadUrl = await imageRef.getDownloadURL();
-      print('Image uploaded successfully. Download URL: $downloadUrl');
-      return downloadUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      return '';
-    }
-  }
-
   Future<void> createThePost() async {
-    final pickedFile = await pickImage();
+    final pickedFile = await const UploadImageService().pickImage();
     final currUser = await _getCurrentUser();
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
-      final imageUrl = await uploadImage(imageFile);
+      final imageUrl = await const UploadImageService().uploadImage(imageFile);
       await firestoreService.addPost(
           titlePostController.text,
           textPostController.text,
@@ -122,10 +87,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> updateThePost(String docID) async {
-    final pickedFile = await pickImage();
+    final pickedFile = await const UploadImageService().pickImage();
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
-      final imageUrl = await uploadImage(imageFile);
+      final imageUrl = await const UploadImageService().uploadImage(imageFile);
       await firestoreService.updatePost(docID, titlePostController.text,
           textPostController.text, imageUrl.toString());
     } else {
@@ -133,6 +98,31 @@ class _HomePageState extends State<HomePage> {
     }
     titlePostController.clear();
     textPostController.clear();
+  }
+
+  Widget getCurrentUserEmailTextWidget() {
+    return FutureBuilder<User?>(
+      future: _getCurrentUser(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (snapshot.hasData) {
+          User? user = snapshot.data;
+          return Text(
+            user?.email ?? 'No user signed in',
+            style: const TextStyle(fontSize: 20, color: Colors.blue),
+          );
+        } else {
+          return const Text('No user signed in');
+        }
+      },
+    );
+  }
+
+  void signOut() {
+    FirebaseAuth.instance.signOut();
   }
 
   @override
@@ -167,81 +157,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: openPostBox,
         child: const Icon(Icons.add),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: firestoreService.getPostsStream(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List postsList = snapshot.data!.docs;
-            return ListView.builder(
-              itemCount: postsList.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot document = postsList[index];
-                String docID = document.id;
-                Map<String, dynamic> data =
-                    document.data() as Map<String, dynamic>;
-                String postTitle = data['title'];
-                String postText = data['text'];
-                // A Post
-                return Column(
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 233, 233, 233)),
-                      height: 400,
-                      width: double.infinity,
-                    ),
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                postTitle,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            const Spacer(),
-                            // Favorite button
-                            IconButton(
-                              //padding: const EdgeInsets.only(top: 15, right: 15),
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.favorite,
-                                size: 30,
-                              ),
-                            ),
-                            // updatebutton
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Flexible(
-                                //padding: const EdgeInsets.only(left: 10, top: 5),
-                                child: Text(postText),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            );
-          } else {
-            return const Center(
-                child: CircularProgressIndicator(
-              backgroundColor: Colors.purple,
-            ));
-          }
-        },
-      ),
+      body: FeedPosts(firestoreService: firestoreService),
       drawer: Drawer(
         child: Container(
           decoration: const BoxDecoration(
@@ -308,26 +224,7 @@ class _HomePageState extends State<HomePage> {
                       style:
                           TextStyle(color: Color.fromARGB(126, 241, 241, 241)),
                     ),
-                    FutureBuilder<User?>(
-                      future: _getCurrentUser(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else if (snapshot.hasData) {
-                          User? user = snapshot.data;
-                          return Text(
-                            user?.email ?? 'No user signed in',
-                            style: const TextStyle(
-                                fontSize: 20, color: Colors.blue),
-                          );
-                        } else {
-                          return const Text('No user signed in');
-                        }
-                      },
-                    ),
+                    getCurrentUserEmailTextWidget(),
                   ],
                 ),
               ),
