@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:message_app/pages/following_page.dart';
 
 import 'package:message_app/pages/my_posts_page.dart';
 import 'package:message_app/pages/profile_page.dart';
@@ -85,41 +86,6 @@ class _HomePageState extends State<HomePage> {
     }
     titlePostController.clear();
     textPostController.clear();
-  }
-
-  // Future<void> updateThePost(String docID) async {
-  //   final pickedFile = await const UploadImageService().pickImage();
-  //   if (pickedFile != null) {
-  //     final imageFile = File(pickedFile.path);
-  //     final imageUrl = await const UploadImageService().uploadImage(imageFile);
-  //     await firestoreService.updatePost(docID, titlePostController.text,
-  //         textPostController.text, imageUrl.toString());
-  //   } else {
-  //     print('No image selected.');
-  //   }
-  //   titlePostController.clear();
-  //   textPostController.clear();
-  // }
-
-  Widget getCurrentUserEmailTextWidget() {
-    return FutureBuilder<User?>(
-      future: _getCurrentUser(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else if (snapshot.hasData) {
-          User? user = snapshot.data;
-          return Text(
-            user?.email ?? 'No user signed in',
-            style: const TextStyle(fontSize: 20, color: Colors.blue),
-          );
-        } else {
-          return const Text('No user signed in');
-        }
-      },
-    );
   }
 
   @override
@@ -209,10 +175,7 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Flexible(
-                                //padding: const EdgeInsets.only(left: 10, top: 5),
-                                child: Text(postText),
-                              ),
+                              child: Text(postText),
                             ),
                           ],
                         ),
@@ -282,6 +245,18 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.emoji_people, color: Colors.white),
+                title: const Text('Following',
+                    style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FollowingPage()),
+                  );
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.person, color: Colors.white),
                 title: const Text('Profile',
                     style: TextStyle(color: Colors.white)),
@@ -292,18 +267,6 @@ class _HomePageState extends State<HomePage> {
                         builder: (context) => const ProfilePage()),
                   );
                 },
-              ),
-              Center(
-                child: Column(
-                  children: [
-                    const Text(
-                      'Current User:',
-                      style:
-                          TextStyle(color: Color.fromARGB(126, 241, 241, 241)),
-                    ),
-                    getCurrentUserEmailTextWidget(),
-                  ],
-                ),
               ),
             ],
           ),
