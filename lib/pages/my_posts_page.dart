@@ -159,6 +159,9 @@ class _MyPostsPageState extends State<MyPostsPage> {
                     document.data() as Map<String, dynamic>;
                 String postTitle = data['title'];
                 String postText = data['text'];
+                List<String> likedBy = List<String>.from(data['likedBy'] ?? []);
+                bool isLiked =
+                    likedBy.contains(FirebaseAuth.instance.currentUser?.email);
                 // A Post
                 return Column(
                   children: [
@@ -184,21 +187,24 @@ class _MyPostsPageState extends State<MyPostsPage> {
                             // Favorite button
                             IconButton(
                               //padding: const EdgeInsets.only(top: 15, right: 15),
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.favorite,
+                              onPressed: () => firestoreService.likePost(docID),
+                              icon: Icon(
+                                isLiked
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
                                 size: 30,
                               ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('${likedBy.length} likes'),
                             ),
                             // updatebutton
                             IconButton(
-                              //padding: const EdgeInsets.only(top: 15, right: 15),
-                              onPressed: () => openPostBox(docID: docID),
-                              icon: const Icon(
-                                Icons.settings,
-                                size: 30,
-                              ),
-                            ),
+                                //padding: const EdgeInsets.only(top: 15, right: 15),
+                                onPressed: () => openPostBox(docID: docID),
+                                icon: const Icon(Icons.settings)),
+
                             // deletebutton
                             IconButton(
                               //padding: const EdgeInsets.only(top: 15, right: 15),
@@ -230,6 +236,8 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 );
               },
             );
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             return const Center(
                 child: CircularProgressIndicator(

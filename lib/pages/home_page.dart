@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:message_app/components/feed_posts.dart';
 import 'package:message_app/pages/my_posts_page.dart';
 import 'package:message_app/services/firestore.dart';
 import 'package:message_app/services/upload_image.dart';
@@ -157,7 +157,90 @@ class _HomePageState extends State<HomePage> {
         onPressed: openPostBox,
         child: const Icon(Icons.add),
       ),
-      body: FeedPosts(firestoreService: firestoreService),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: firestoreService.getPostsStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List postsList = snapshot.data!.docs;
+            return ListView.builder(
+              itemCount: postsList.length,
+              itemBuilder: (context, index) {
+                DocumentSnapshot document = postsList[index];
+                String docID = document.id;
+                Map<String, dynamic> data =
+                    document.data() as Map<String, dynamic>;
+                String postTitle = data['title'];
+                String postText = data['text'];
+                List<String> likedBy = List<String>.from(data['likedBy'] ?? []);
+                bool isLiked =
+                    likedBy.contains(FirebaseAuth.instance.currentUser?.email);
+                // A Post
+                return Column(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                          color: Color.fromARGB(255, 233, 233, 233)),
+                      height: 400,
+                      width: double.infinity,
+                    ),
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                postTitle,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const Spacer(),
+                            // Favorite button
+                            IconButton(
+                              //padding: const EdgeInsets.only(top: 15, right: 15),
+                              onPressed: () => firestoreService.likePost(docID),
+                              icon: Icon(
+                                isLiked
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                size: 30,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('${likedBy.length} likes'),
+                            ),
+                            // updatebutton
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Flexible(
+                                //padding: const EdgeInsets.only(left: 10, top: 5),
+                                child: Text(postText),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            );
+          } else {
+            return const Center(
+                child: CircularProgressIndicator(
+              backgroundColor: Colors.purple,
+            ));
+          }
+        },
+      ),
       drawer: Drawer(
         child: Container(
           decoration: const BoxDecoration(

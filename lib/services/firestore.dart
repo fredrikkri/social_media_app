@@ -20,8 +20,7 @@ class FirestoreService {
       return const Stream.empty();
     }
 
-    String currentUserEmail = user.email ?? ''; // Brukerens e-post
-    print('Hentet brukerens e-post: $currentUserEmail');
+    String currentUserEmail = user.email!; // Brukerens e-post
 
     final postsStream = posts
         .where('createdBy', isEqualTo: currentUserEmail)
@@ -42,6 +41,7 @@ class FirestoreService {
       'text': text,
       'imageUrl': imageUrl,
       'createdBy': user,
+      'likedBy': [],
     });
   }
 
@@ -57,5 +57,30 @@ class FirestoreService {
 
   Future<void> deletePost(String docID) {
     return posts.doc(docID).delete();
+  }
+
+  Future<void> likePost(String postId) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    String userEmail = user.email!;
+    DocumentReference postRef = posts.doc(postId);
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(postRef);
+
+      if (!snapshot.exists) {
+        throw Exception("Post does not exist!");
+      }
+
+      List<String> likedBy = List<String>.from(snapshot['likedBy'] ?? []);
+      if (likedBy.contains(userEmail)) {
+        likedBy.remove(userEmail);
+      } else {
+        likedBy.add(userEmail);
+      }
+
+      transaction.update(postRef, {'likedBy': likedBy});
+    });
   }
 }
