@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:message_app/pages/home_page.dart';
+import 'package:message_app/pages/profile_page.dart';
 
 import 'package:message_app/services/firestore.dart';
 import 'package:message_app/services/upload_image.dart';
@@ -135,10 +136,9 @@ class _MyPostsPageState extends State<MyPostsPage> {
             );
           },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: openPostBox,
-        child: const Icon(Icons.add),
+        actions: [
+          IconButton(onPressed: openPostBox, icon: const Icon(Icons.add))
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: firestoreService.getPostsStreamCurrentUser(),
@@ -234,10 +234,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            return const Center(
-                child: CircularProgressIndicator(
-              backgroundColor: Colors.purple,
-            ));
+            return const Center(child: Text('You have no posts...'));
           }
         },
       ),
@@ -263,7 +260,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 ),
                 child: Center(
                   child: Text(
-                    'Menu',
+                    'SocialApp',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -296,7 +293,11 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 title: const Text('Profile',
                     style: TextStyle(color: Colors.white)),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfilePage()),
+                  );
                 },
               ),
               Center(
@@ -315,7 +316,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

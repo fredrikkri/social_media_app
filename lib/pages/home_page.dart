@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:message_app/pages/my_posts_page.dart';
+import 'package:message_app/pages/profile_page.dart';
 import 'package:message_app/services/firestore.dart';
 import 'package:message_app/services/upload_image.dart';
 
@@ -121,11 +122,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void signOut() {
-    FirebaseAuth.instance.signOut();
-    Navigator.popUntil(context, ModalRoute.withName("/"));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,7 +129,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: const Text(
-          "MessageApp",
+          "Home",
           style: TextStyle(color: Colors.blue),
         ),
         leading: Builder(
@@ -147,16 +143,8 @@ class _HomePageState extends State<HomePage> {
           },
         ),
         actions: [
-          // sign out button
-          IconButton(
-            onPressed: signOut,
-            icon: const Icon(Icons.logout),
-          )
+          IconButton(onPressed: openPostBox, icon: const Icon(Icons.add))
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: openPostBox,
-        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: firestoreService.getPostsStream(),
@@ -264,7 +252,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: Center(
                   child: Text(
-                    'Menu',
+                    'SocialApp',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -298,7 +286,11 @@ class _HomePageState extends State<HomePage> {
                 title: const Text('Profile',
                     style: TextStyle(color: Colors.white)),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfilePage()),
+                  );
                 },
               ),
               Center(
@@ -317,7 +309,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
