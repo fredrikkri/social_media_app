@@ -123,6 +123,7 @@ class _HomePageState extends State<HomePage> {
 
   void signOut() {
     FirebaseAuth.instance.signOut();
+    Navigator.popUntil(context, ModalRoute.withName("/"));
   }
 
   @override
@@ -287,7 +288,8 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => MyPostsPage()),
+                    MaterialPageRoute(
+                        builder: (context) => const MyPostsPage()),
                   );
                 },
               ),
