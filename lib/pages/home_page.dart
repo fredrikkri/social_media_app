@@ -54,11 +54,11 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               if (docID == null) {
                 createThePost();
-              } else {
-                updateThePost(docID);
               }
-              // titlePostController.clear();
-              // textPostController.clear();
+              // } else {
+              //   updateThePost(docID);
+              // }
+
               Navigator.pop(context);
             },
             child: const Text('Add'),
@@ -86,19 +86,19 @@ class _HomePageState extends State<HomePage> {
     textPostController.clear();
   }
 
-  Future<void> updateThePost(String docID) async {
-    final pickedFile = await const UploadImageService().pickImage();
-    if (pickedFile != null) {
-      final imageFile = File(pickedFile.path);
-      final imageUrl = await const UploadImageService().uploadImage(imageFile);
-      await firestoreService.updatePost(docID, titlePostController.text,
-          textPostController.text, imageUrl.toString());
-    } else {
-      print('No image selected.');
-    }
-    titlePostController.clear();
-    textPostController.clear();
-  }
+  // Future<void> updateThePost(String docID) async {
+  //   final pickedFile = await const UploadImageService().pickImage();
+  //   if (pickedFile != null) {
+  //     final imageFile = File(pickedFile.path);
+  //     final imageUrl = await const UploadImageService().uploadImage(imageFile);
+  //     await firestoreService.updatePost(docID, titlePostController.text,
+  //         textPostController.text, imageUrl.toString());
+  //   } else {
+  //     print('No image selected.');
+  //   }
+  //   titlePostController.clear();
+  //   textPostController.clear();
+  // }
 
   Widget getCurrentUserEmailTextWidget() {
     return FutureBuilder<User?>(

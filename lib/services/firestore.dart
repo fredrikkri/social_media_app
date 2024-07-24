@@ -46,7 +46,7 @@ class FirestoreService {
   }
 
   Future<void> updatePost(
-      String docID, String title, String text, String imageUrl) {
+      String docID, String? title, String? text, String? imageUrl) {
     return posts.doc(docID).update({
       'title': title,
       'timestamp': Timestamp.now(),

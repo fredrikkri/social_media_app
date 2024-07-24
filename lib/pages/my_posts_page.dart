@@ -56,8 +56,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
               } else {
                 updateThePost(docID);
               }
-              // titlePostController.clear();
-              // textPostController.clear();
               Navigator.pop(context);
             },
             child: const Text('Add'),
@@ -73,11 +71,8 @@ class _MyPostsPageState extends State<MyPostsPage> {
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
       final imageUrl = await const UploadImageService().uploadImage(imageFile);
-      await firestoreService.addPost(
-          titlePostController.text,
-          textPostController.text,
-          imageUrl.toString(),
-          currUser?.email ?? 'undefined');
+      await firestoreService.addPost(titlePostController.text,
+          textPostController.text, imageUrl, currUser?.email ?? 'undefined');
     } else {
       print('No image selected.');
     }
