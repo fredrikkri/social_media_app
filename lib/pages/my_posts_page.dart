@@ -22,11 +22,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
     return FirebaseAuth.instance.currentUser;
   }
 
-  // sign user out
-  void signOut() {
-    FirebaseAuth.instance.signOut();
-  }
-
   // open a dialog box to add a post
   void openPostBox({String? docID}) {
     showDialog(
