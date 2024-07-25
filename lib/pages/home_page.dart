@@ -18,7 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final firestoreService = FirestoreService();
+  final firestoreService = FirestorePostService();
   final titlePostController = TextEditingController();
   final textPostController = TextEditingController();
 

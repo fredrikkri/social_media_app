@@ -17,7 +17,7 @@ class MyPostsPage extends StatefulWidget {
 }
 
 class _MyPostsPageState extends State<MyPostsPage> {
-  final firestoreService = FirestoreService();
+  final firestoreService = FirestorePostService();
   final titlePostController = TextEditingController();
   final textPostController = TextEditingController();
 
