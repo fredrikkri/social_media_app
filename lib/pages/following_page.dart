@@ -1,13 +1,85 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:message_app/pages/home_page.dart';
 import 'package:message_app/pages/my_posts_page.dart';
 import 'package:message_app/pages/profile_page.dart';
+import 'package:message_app/services/firestore_user.dart';
 
 class FollowingPage extends StatefulWidget {
   const FollowingPage({super.key});
 
   @override
   State<FollowingPage> createState() => _FollowingPageState();
+}
+
+void showUserList(BuildContext context) {
+  final firestoreUserService = FirestoreUserService();
+  showDialog(
+    context: context,
+    builder: (context) {
+      return SimpleDialog(
+        title: const Text('Users'),
+        children: [
+          SizedBox(
+            width: double.maxFinite,
+            height: 300, // Sett høyde for å sikre at listen er rullbar
+            child: StreamBuilder<QuerySnapshot>(
+              stream: firestoreUserService.getUsersStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No users found.'));
+                }
+
+                List<DocumentSnapshot> users = snapshot.data!.docs;
+                return ListView.builder(
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    Map<String, dynamic> user =
+                        users[index].data() as Map<String, dynamic>;
+                    return ListTile(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(user['email'] ?? 'No Email'),
+                          TextButton(
+                            onPressed: () {
+                              firestoreUserService.followAUser(user['email']);
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              textStyle: const TextStyle(fontSize: 14),
+                            ),
+                            child: const Text(
+                              'Follow',
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 class _FollowingPageState extends State<FollowingPage> {
@@ -33,7 +105,11 @@ class _FollowingPageState extends State<FollowingPage> {
         ),
         actions: [
           IconButton(
-              onPressed: () {}, icon: const Icon(Icons.find_in_page_rounded))
+            onPressed: () {
+              showUserList(context);
+            },
+            icon: const Icon(Icons.find_in_page_rounded),
+          )
         ],
       ),
       drawer: Drawer(

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:message_app/components/button.dart';
 import 'package:message_app/components/text_field.dart';
+import 'package:message_app/services/firestore_user.dart';
 
 class RegisterPage extends StatefulWidget {
   final Function()? onTap;
@@ -51,6 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: emailTextController.text,
         password: passwordTextController.text,
       );
+      FirestoreUserService().addUser();
       // pop loading circle
       if (context.mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {

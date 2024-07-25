@@ -47,12 +47,21 @@ class FirestorePostService {
 
   Future<void> updatePost(
       String docID, String? title, String? text, String? imageUrl) {
-    return posts.doc(docID).update({
-      'title': title,
+    Map<String, dynamic> updateData = {
       'timestamp': Timestamp.now(),
-      'text': text,
-      'imageUrl': imageUrl,
-    });
+    };
+
+    if (title != null && title.isNotEmpty) {
+      updateData['title'] = title;
+    }
+    if (text != null && text.isNotEmpty) {
+      updateData['text'] = text;
+    }
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      updateData['imageUrl'] = imageUrl;
+    }
+
+    return posts.doc(docID).update(updateData);
   }
 
   Future<void> deletePost(String docID) {
