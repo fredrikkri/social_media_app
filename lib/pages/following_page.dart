@@ -32,7 +32,8 @@ class _FollowingPageState extends State<FollowingPage> {
           },
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.add_alert_sharp))
+          IconButton(
+              onPressed: () {}, icon: const Icon(Icons.find_in_page_rounded))
         ],
       ),
       drawer: Drawer(

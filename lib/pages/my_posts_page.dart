@@ -211,7 +211,9 @@ class _MyPostsPageState extends State<MyPostsPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            return const Center(child: Text('You have no posts...'));
+            return const Center(
+                child: Text(
+                    'You have no posts. Click the button (+) in the top right corner to create a post.'));
           }
         },
       ),
