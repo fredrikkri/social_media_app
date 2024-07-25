@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:message_app/pages/home_page.dart';
 import 'package:message_app/pages/my_posts_page.dart';
@@ -14,6 +15,7 @@ class FollowingPage extends StatefulWidget {
 
 void showUserList(BuildContext context) {
   final firestoreUserService = FirestoreUserService();
+
   showDialog(
     context: context,
     builder: (context) {
@@ -36,12 +38,26 @@ void showUserList(BuildContext context) {
                   return const Center(child: Text('No users found.'));
                 }
 
-                List<DocumentSnapshot> users = snapshot.data!.docs;
+                // Hent den nåværende brukerens e-post
+                User? currentUser = FirebaseAuth.instance.currentUser;
+                String currentUserEmail = currentUser?.email ?? '';
+
+                // Filtrer ut den nåværende brukeren fra listen
+                List<DocumentSnapshot> users = snapshot.data!.docs.where((doc) {
+                  Map<String, dynamic> user =
+                      doc.data() as Map<String, dynamic>;
+                  return user['email'] !=
+                      currentUserEmail; // Ekskluder den nåværende brukeren
+                }).toList();
+
                 return ListView.builder(
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     Map<String, dynamic> user =
                         users[index].data() as Map<String, dynamic>;
+                    bool isFollowing = currentUser != null &&
+                        List<String>.from(user['followers'] ?? [])
+                            .contains(currentUserEmail);
                     return ListTile(
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -53,13 +69,14 @@ void showUserList(BuildContext context) {
                             },
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.white,
-                              backgroundColor: Colors.blue,
+                              backgroundColor:
+                                  isFollowing ? Colors.red : Colors.blue,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16, vertical: 8),
                               textStyle: const TextStyle(fontSize: 14),
                             ),
-                            child: const Text(
-                              'Follow',
+                            child: Text(
+                              isFollowing ? 'Unfollow' : 'Follow',
                             ),
                           ),
                         ],
