@@ -7,7 +7,7 @@ import 'package:message_app/pages/following_page.dart';
 
 import 'package:message_app/pages/my_posts_page.dart';
 import 'package:message_app/pages/profile_page.dart';
-import 'package:message_app/services/firestore.dart';
+import 'package:message_app/services/firestore_posts.dart';
 import 'package:message_app/services/upload_image.dart';
 
 class HomePage extends StatefulWidget {
