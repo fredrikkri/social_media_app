@@ -12,15 +12,13 @@ class FirestorePostService {
   }
 
   Stream<QuerySnapshot> getPostsStreamCurrentUser() {
-    // Hent den innloggede brukeren
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      // Returner en tom stream eller håndter tilfelle der ingen bruker er logget inn
       return const Stream.empty();
     }
 
-    String currentUserEmail = user.email!; // Brukerens e-post
+    String currentUserEmail = user.email!;
 
     final postsStream = posts
         .where('createdBy', isEqualTo: currentUserEmail)
