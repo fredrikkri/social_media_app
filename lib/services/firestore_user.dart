@@ -110,4 +110,33 @@ class FirestoreUserService {
       print("Stack trace: $stackTrace");
     }
   }
+
+  Stream<List<String>?> getFollowingForCurrentUser() {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Stream.empty();
+    }
+
+    String currentUserEmail = user.email!;
+
+    final followingStream = users
+        .where('email', isEqualTo: currentUserEmail)
+        .orderBy('email', descending: true)
+        .snapshots()
+        .map((querySnapshot) {
+      List<String> followingList = [];
+      for (var doc in querySnapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        var following = data['following'];
+        if (following is List) {
+          followingList.addAll(following.whereType<String>());
+        }
+      }
+    }).handleError((error) {
+      print('Feil ved henting av personer som du følger: $error');
+      return [];
+    });
+    return followingStream;
+  }
 }
