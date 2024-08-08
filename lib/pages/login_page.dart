@@ -12,13 +12,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // text editing controller
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
 
-  //sign in method
   void signIn() async {
-    // show loading circle
     showDialog(
       context: context,
       builder: (context) => const Center(
@@ -26,24 +23,19 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
 
-    // try sign in
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailTextController.text,
         password: passwordTextController.text,
       );
 
-      // pop loading circle
       if (context.mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
-      // pop loading circle
       Navigator.pop(context);
-      // display error message
       displayMessage(e.code);
     }
   }
 
-  // display a dialog message
   void displayMessage(String message) {
     showDialog(
       context: context,
@@ -64,58 +56,41 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                //Logo
                 const Icon(
                   Icons.lock,
                   size: 100,
                 ),
-
                 const SizedBox(
                   height: 50,
                 ),
-
-                // Welcome back message
                 Text(
                   "Welcome back, you've been missed!",
                   style: TextStyle(color: Colors.grey[700]),
                 ),
-
                 const SizedBox(
                   height: 25,
                 ),
-
-                // email text field
                 MyTextField(
                     controller: emailTextController,
                     hintText: "Email",
                     obscureText: false),
-
                 const SizedBox(
                   height: 10,
                 ),
-
-                // password textfield
-
                 MyTextField(
                     controller: passwordTextController,
                     hintText: "Password",
                     obscureText: true),
-
                 const SizedBox(
                   height: 25,
                 ),
-
-                // sign in button
                 MyButton(
                   onTap: signIn,
                   text: "Sign In",
                 ),
-
                 const SizedBox(
                   height: 25,
                 ),
-
-                // go to registrer page
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

@@ -13,12 +13,10 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // text editing controller
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
   final confirmPasswordTextController = TextEditingController();
 
-  // display a dialog message
   void displayMessage(String message) {
     showDialog(
       context: context,
@@ -28,9 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Sign user up method
   void signUp() async {
-    // show loading circle
     showDialog(
       context: context,
       builder: (context) => const Center(
@@ -39,25 +35,21 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     if (passwordTextController.text != confirmPasswordTextController.text) {
-      // pop loading circle
       Navigator.pop(context);
-      // show error to user
       displayMessage("Passwords don't match");
       return;
     }
 
-    // try creating the user
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailTextController.text,
         password: passwordTextController.text,
       );
       FirestoreUserService().addUser();
-      // pop loading circle
       if (context.mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
-      //show error to user
+
       displayMessage(e.code);
     }
   }
@@ -73,67 +65,48 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                //Logo
                 const Icon(
                   Icons.lock,
                   size: 100,
                 ),
-
                 const SizedBox(
                   height: 50,
                 ),
-
-                // Welcome back message
                 Text(
                   "Lets create an account for you.",
                   style: TextStyle(color: Colors.grey[700]),
                 ),
-
                 const SizedBox(
                   height: 25,
                 ),
-
-                // email text field
                 MyTextField(
                     controller: emailTextController,
                     hintText: "Email",
                     obscureText: false),
-
                 const SizedBox(
                   height: 10,
                 ),
-
-                // password textfield
                 MyTextField(
                     controller: passwordTextController,
                     hintText: "Password",
                     obscureText: true),
-
                 const SizedBox(
                   height: 10,
                 ),
-
-                // confirm password textfield
                 MyTextField(
                     controller: confirmPasswordTextController,
                     hintText: "Confirm Password",
                     obscureText: true),
-
                 const SizedBox(
                   height: 25,
                 ),
-
-                // sign up button
                 MyButton(
                   onTap: signUp,
                   text: "Sign Up",
                 ),
-
                 const SizedBox(
                   height: 25,
                 ),
-
-                // go to registrer page
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

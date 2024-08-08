@@ -22,7 +22,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
   final textPostController = TextEditingController();
 
   Future<User?> _getCurrentUser() async {
-    // Get the current user
     return FirebaseAuth.instance.currentUser;
   }
 
@@ -50,7 +49,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
           ),
         ),
         actions: [
-          // button to save
           ElevatedButton(
             onPressed: () {
               if (docID == null) {
@@ -137,7 +135,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 List<String> likedBy = List<String>.from(data['likedBy'] ?? []);
                 bool isLiked =
                     likedBy.contains(FirebaseAuth.instance.currentUser?.email);
-                // A Post
                 return Column(
                   children: [
                     Container(
@@ -166,9 +163,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
                               ),
                             ),
                             const Spacer(),
-                            // Favorite button
                             IconButton(
-                              //padding: const EdgeInsets.only(top: 15, right: 15),
                               onPressed: () => firestoreService.likePost(docID),
                               icon: Icon(
                                 isLiked
@@ -181,15 +176,10 @@ class _MyPostsPageState extends State<MyPostsPage> {
                               padding: const EdgeInsets.all(8.0),
                               child: Text('${likedBy.length} likes'),
                             ),
-                            // updatebutton
                             IconButton(
-                                //padding: const EdgeInsets.only(top: 15, right: 15),
                                 onPressed: () => openPostBox(docID: docID),
                                 icon: const Icon(Icons.settings)),
-
-                            // deletebutton
                             IconButton(
-                              //padding: const EdgeInsets.only(top: 15, right: 15),
                               onPressed: () =>
                                   firestoreService.deletePost(docID),
                               icon: const Icon(

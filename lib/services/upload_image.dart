@@ -15,7 +15,7 @@ class UploadImageService extends StatelessWidget {
 
   Future<String> uploadImage(File imageFile) async {
     try {
-      print('Uploading image: ${imageFile.path}');
+      print('mage path: ${imageFile.path}');
       final storageRef = FirebaseStorage.instance.ref();
       final imageRef = storageRef
           .child('images/${DateTime.now().millisecondsSinceEpoch}.png');

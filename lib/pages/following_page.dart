@@ -25,7 +25,7 @@ void showUserList(BuildContext context) {
         children: [
           SizedBox(
             width: double.maxFinite,
-            height: 300, // Sett høyde for å sikre at listen er rullbar
+            height: 300,
             child: StreamBuilder<QuerySnapshot>(
               stream: firestoreUserService.getUsersStream(),
               builder: (context, snapshot) {
@@ -39,16 +39,13 @@ void showUserList(BuildContext context) {
                   return const Center(child: Text('No users found.'));
                 }
 
-                // Hent den nåværende brukerens e-post
                 User? currentUser = FirebaseAuth.instance.currentUser;
                 String currentUserEmail = currentUser?.email ?? '';
 
-                // Filtrer ut den nåværende brukeren fra listen
                 List<DocumentSnapshot> users = snapshot.data!.docs.where((doc) {
                   Map<String, dynamic> user =
                       doc.data() as Map<String, dynamic>;
-                  return user['email'] !=
-                      currentUserEmail; // Ekskluder den nåværende brukeren
+                  return user['email'] != currentUserEmail;
                 }).toList();
 
                 return ListView.builder(

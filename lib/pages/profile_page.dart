@@ -15,7 +15,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<User?> _getCurrentUser() async {
-    // Get the current user
     return FirebaseAuth.instance.currentUser;
   }
 
@@ -52,7 +51,6 @@ class _ProfilePageState extends State<ProfilePage> {
           style: TextStyle(color: Colors.blue),
         ),
         actions: [
-          // sign out button
           IconButton(
             onPressed: signOut,
             icon: const Icon(Icons.logout),

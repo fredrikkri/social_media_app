@@ -41,7 +41,6 @@ class _UserPageState extends State<UserPage> {
                 List<String> likedBy = List<String>.from(data['likedBy'] ?? []);
                 bool isLiked =
                     likedBy.contains(FirebaseAuth.instance.currentUser?.email);
-                // A Post
                 return Column(
                   children: [
                     Container(
@@ -70,9 +69,7 @@ class _UserPageState extends State<UserPage> {
                               ),
                             ),
                             const Spacer(),
-                            // Favorite button
                             IconButton(
-                              //padding: const EdgeInsets.only(top: 15, right: 15),
                               onPressed: () => firestoreService.likePost(docID),
                               icon: Icon(
                                 isLiked
@@ -85,7 +82,6 @@ class _UserPageState extends State<UserPage> {
                               padding: const EdgeInsets.all(8.0),
                               child: Text('${likedBy.length} likes'),
                             ),
-                            // updatebutton
                           ],
                         ),
                         Column(

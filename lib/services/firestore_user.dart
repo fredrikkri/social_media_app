@@ -33,7 +33,6 @@ class FirestoreUserService {
     print('User to follow: $emailUserToFollow');
 
     try {
-      // Finn dokument-ID-en for brukeren som skal følges basert på e-post
       QuerySnapshot querySnapshotToFollow = await FirebaseFirestore.instance
           .collection('users')
           .where('email', isEqualTo: emailUserToFollow)
@@ -50,7 +49,6 @@ class FirestoreUserService {
       DocumentReference userToFollowRef =
           FirebaseFirestore.instance.collection('users').doc(userToFollowId);
 
-      // Finn dokument-ID-en for den nåværende brukeren basert på e-post
       QuerySnapshot querySnapshotCurrentUser = await FirebaseFirestore.instance
           .collection('users')
           .where('email', isEqualTo: currentUserEmail)
@@ -69,7 +67,6 @@ class FirestoreUserService {
           FirebaseFirestore.instance.collection('users').doc(currentUserId);
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        // Hent og oppdater 'followers' listen for brukeren som skal følges
         DocumentSnapshot userToFollowData =
             await transaction.get(userToFollowRef);
         List<String> followersList =
@@ -84,7 +81,6 @@ class FirestoreUserService {
           print('Added $currentUserEmail to followers list');
         }
 
-        // Hent og oppdater 'following' listen for den nåværende brukeren
         DocumentSnapshot currentUserData =
             await transaction.get(currentUserRef);
         List<String> followingList =
@@ -99,7 +95,6 @@ class FirestoreUserService {
           print('Added $emailUserToFollow to following list');
         }
 
-        // Oppdater dokumentene
         transaction.update(userToFollowRef, {'followers': followersList});
         transaction.update(currentUserRef, {'following': followingList});
 
@@ -133,10 +128,10 @@ class FirestoreUserService {
           followingList.addAll(following.whereType<String>());
         }
       }
-      return followingList; // Her returnerer vi listen som inneholder 'following'-strenger
+      return followingList;
     }).handleError((error) {
       print('Feil ved henting av personer som du følger: $error');
-      return []; // Returner en tom liste ved feil
+      return [];
     });
 
     return followingStream;

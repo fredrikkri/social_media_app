@@ -23,7 +23,6 @@ class _HomePageState extends State<HomePage> {
   final textPostController = TextEditingController();
 
   Future<User?> _getCurrentUser() async {
-    // Get the current user
     return FirebaseAuth.instance.currentUser;
   }
 
@@ -51,16 +50,11 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         actions: [
-          // button to save
           ElevatedButton(
             onPressed: () {
               if (docID == null) {
                 createThePost();
               }
-              // } else {
-              //   updateThePost(docID);
-              // }
-
               Navigator.pop(context);
             },
             child: const Text('Add'),
@@ -129,7 +123,6 @@ class _HomePageState extends State<HomePage> {
                 List<String> likedBy = List<String>.from(data['likedBy'] ?? []);
                 bool isLiked =
                     likedBy.contains(FirebaseAuth.instance.currentUser?.email);
-                // A Post
                 return Column(
                   children: [
                     Container(
@@ -158,9 +151,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             const Spacer(),
-                            // Favorite button
                             IconButton(
-                              //padding: const EdgeInsets.only(top: 15, right: 15),
                               onPressed: () => firestoreService.likePost(docID),
                               icon: Icon(
                                 isLiked
@@ -173,7 +164,6 @@ class _HomePageState extends State<HomePage> {
                               padding: const EdgeInsets.all(8.0),
                               child: Text('${likedBy.length} likes'),
                             ),
-                            // updatebutton
                           ],
                         ),
                         Column(
