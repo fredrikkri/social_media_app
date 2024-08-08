@@ -20,7 +20,7 @@ void showUserList(BuildContext context) {
     context: context,
     builder: (context) {
       return SimpleDialog(
-        title: const Text('Users'),
+        title: const Text('Existing Users'),
         children: [
           SizedBox(
             width: double.maxFinite,
@@ -206,6 +206,42 @@ class _FollowingPageState extends State<FollowingPage> {
             ],
           ),
         ),
+      ),
+      body: StreamBuilder<List<String>?>(
+        stream: FirestoreUserService().getFollowingForCurrentUser(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Ingen følgere funnet.'));
+          }
+
+          List<String> followingList = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: followingList.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.grey[200]),
+                    child: Text(followingList[index]),
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

@@ -133,10 +133,12 @@ class FirestoreUserService {
           followingList.addAll(following.whereType<String>());
         }
       }
+      return followingList; // Her returnerer vi listen som inneholder 'following'-strenger
     }).handleError((error) {
       print('Feil ved henting av personer som du følger: $error');
-      return [];
+      return []; // Returner en tom liste ved feil
     });
+
     return followingStream;
   }
 }
