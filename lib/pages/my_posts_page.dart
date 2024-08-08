@@ -145,6 +145,13 @@ class _MyPostsPageState extends State<MyPostsPage> {
                           color: Color.fromARGB(255, 233, 233, 233)),
                       height: 400,
                       width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          '${data['createdBy']}',
+                          style: const TextStyle(color: Colors.blue),
+                        ),
+                      ),
                     ),
                     Column(
                       children: [

@@ -11,6 +11,14 @@ class FirestorePostService {
     return postsStream;
   }
 
+  Stream<QuerySnapshot> getPostsStreamByEmail(String email) {
+    final postsStream = posts
+        .where('createdBy', isEqualTo: email)
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+    return postsStream;
+  }
+
   Stream<QuerySnapshot> getPostsStreamCurrentUser() {
     User? user = FirebaseAuth.instance.currentUser;
 

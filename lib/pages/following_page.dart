@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:message_app/pages/home_page.dart';
 import 'package:message_app/pages/my_posts_page.dart';
 import 'package:message_app/pages/profile_page.dart';
+import 'package:message_app/pages/user_page.dart';
 import 'package:message_app/services/firestore_user.dart';
 
 class FollowingPage extends StatefulWidget {
@@ -229,13 +230,26 @@ class _FollowingPageState extends State<FollowingPage> {
             itemBuilder: (context, index) {
               return ListTile(
                 title: GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            UserPage(email: followingList[index]),
+                      ),
+                    );
+                  },
                   child: Container(
-                    padding: const EdgeInsets.all(5),
+                    padding: const EdgeInsets.only(
+                        left: 8, top: 10, bottom: 10, right: 8),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(10),
                         color: Colors.grey[200]),
-                    child: Text(followingList[index]),
+                    child: Column(
+                      children: [
+                        Text(followingList[index]),
+                      ],
+                    ),
                   ),
                 ),
               );
